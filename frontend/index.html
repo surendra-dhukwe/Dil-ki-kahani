@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dil ki baate ❤️</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="navbar">
+  <h2>Dil ki baate ❤️</h2>
+
+  <div class="nav-buttons">
+    <button onclick="showAll()">📜 Posts</button>
+    <button onclick="loadWriters()">👤 Writers</button>
+  </div>
+
+  Total: <span id="totalPosts">0</span>
+</div>
+
+<!-- SEARCH -->
+<div class="search-box">
+  <input id="searchInput" placeholder="🔍 Search by name..." oninput="searchPosts()">
+</div>
+
+<div class="create-post">
+  <div class="name-box">
+    <input id="user_name" placeholder="Apna naam..." oninput="checkUser()">
+    <button id="createBtn" onclick="createUser()">Create</button>
+  </div>
+
+  <div id="nameMsg" class="msg"></div>
+  <div id="suggestions" class="suggestions"></div>
+
+  <input id="title" placeholder="Title">
+  <textarea id="description" placeholder="Description"></textarea>
+  <textarea id="content" placeholder="Dil ki baat..."></textarea>
+
+  <button onclick="addPost()">Post 🚀</button>
+</div>
+
+<div id="feed"></div>
+<div id="writersBox"></div>
+<!-- SEARCH BAR -->
+<div class="search-box">
+  <input id="searchInput" placeholder="🔍 Search by name..." oninput="searchPosts()">
+</div>
+<script src="script.js"></script>
+</body>
+</html>
