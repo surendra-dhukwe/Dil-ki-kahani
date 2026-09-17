@@ -771,12 +771,16 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log("");
-  console.log("======================================");
-  console.log("       DIL KI BAATE SERVER");
-  console.log("======================================");
-  console.log(`🚀 Server: http://localhost:${PORT}`);
-  console.log("🗄️ Database: MongoDB");
-  console.log("======================================");
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log("");
+    console.log("======================================");
+    console.log("       DIL KI BAATE SERVER");
+    console.log("======================================");
+    console.log(`🚀 Server: http://localhost:${PORT}`);
+    console.log("🗄️ Database: MongoDB");
+    console.log("======================================");
+  });
+}
+
+module.exports = app;
