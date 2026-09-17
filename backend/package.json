@@ -1,40 +1,16 @@
 {
-<<<<<<< HEAD
-  "name": "shayari_line",
+  "name": "shayari-line-backend",
   "version": "1.0.0",
-  "description": "Ek simple aur beautiful web app jaha users apni **shayari, thoughts aur dil ki baate** share kar sakte hain.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-=======
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
+  "description": "Dil Ki Baate backend",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
->>>>>>> 5e41aaeebbfb94a6ce777a2b1da69a65e1d7111e
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-<<<<<<< HEAD
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "mongoose": "^8.24.4",
-    "mysql2": "^3.24.4"
-=======
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.20.0",
-    "node-fetch": "^3.3.2"
->>>>>>> 5e41aaeebbfb94a6ce777a2b1da69a65e1d7111e
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mongoose": "^8.24.4"
   }
 }

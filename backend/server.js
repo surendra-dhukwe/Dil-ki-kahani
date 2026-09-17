@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-<<<<<<< HEAD
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const path = require("path");
@@ -16,7 +15,9 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
-// ================= FRONTEND =================
+/* =====================================================
+   FRONTEND
+===================================================== */
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -145,6 +146,14 @@ const commentSchema = new mongoose.Schema(
 const Comment = mongoose.model("Comment", commentSchema);
 
 /* =====================================================
+   ESCAPE REGEX
+===================================================== */
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/* =====================================================
    DATABASE STATUS
 ===================================================== */
 
@@ -153,7 +162,9 @@ app.get("/api/status", (req, res) => {
 
   res.json({
     server: "Dil Ki Baate",
-    database: connected ? "MongoDB connected" : "MongoDB disconnected",
+    database: connected
+      ? "MongoDB connected"
+      : "MongoDB disconnected",
     status: connected ? "online" : "offline",
   });
 });
@@ -161,16 +172,6 @@ app.get("/api/status", (req, res) => {
 /* =====================================================
    USERS
 ===================================================== */
-
-/*
-   GET USERS
-   Existing script.js expects:
-
-   [
-     { name: "Surendra" },
-     { name: "Dinesh" }
-   ]
-*/
 
 app.get("/users", async (req, res) => {
   try {
@@ -212,10 +213,6 @@ app.post("/createUser", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       CHECK DUPLICATE USER
-    --------------------------------------------- */
-
     const existingUser = await User.findOne({
       name: {
         $regex: `^${escapeRegex(name)}$`,
@@ -230,15 +227,7 @@ app.post("/createUser", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       HASH PASSWORD
-    --------------------------------------------- */
-
     const hash = await bcrypt.hash(password, 10);
-
-    /* ---------------------------------------------
-       CREATE USER
-    --------------------------------------------- */
 
     const user = await User.create({
       name,
@@ -250,6 +239,7 @@ app.post("/createUser", async (req, res) => {
     res.json({
       success: true,
       msg: "Account created successfully",
+
       user: {
         id: user._id.toString(),
         name: user.name,
@@ -258,7 +248,6 @@ app.post("/createUser", async (req, res) => {
   } catch (err) {
     console.error("❌ CREATE USER ERROR:", err);
 
-    /* Duplicate MongoDB unique key */
     if (err.code === 11000) {
       return res.json({
         success: false,
@@ -291,10 +280,6 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       FIND USER
-    --------------------------------------------- */
-
     const user = await User.findOne({
       name: {
         $regex: `^${escapeRegex(name)}$`,
@@ -308,10 +293,6 @@ app.post("/login", async (req, res) => {
         msg: "User not found",
       });
     }
-
-    /* ---------------------------------------------
-       CHECK PASSWORD
-    --------------------------------------------- */
 
     const match = await bcrypt.compare(password, user.password);
 
@@ -327,6 +308,7 @@ app.post("/login", async (req, res) => {
     res.json({
       success: true,
       msg: "Login successful",
+
       user: {
         id: user._id.toString(),
         name: user.name,
@@ -343,7 +325,7 @@ app.post("/login", async (req, res) => {
 });
 
 /* =====================================================
-   POSTS
+   POSTS - GET
 ===================================================== */
 
 app.get("/posts", async (req, res) => {
@@ -363,27 +345,13 @@ app.get("/posts", async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    /*
-       MongoDB:
-
-       _id: ObjectId("...")
-
-       Existing frontend:
-
-       p.id
-
-       Therefore we return BOTH.
-    */
-
     const formattedPosts = posts.map((p) => ({
       ...p,
 
       id: p._id.toString(),
-
       _id: p._id.toString(),
 
       created_at: p.createdAt || null,
-
       updated_at: p.updatedAt || null,
     }));
 
@@ -420,10 +388,6 @@ app.post("/addPost", async (req, res) => {
     hindi = String(hindi || "").trim();
     hinglish = String(hinglish || "").trim();
 
-    /* ---------------------------------------------
-       VALIDATION
-    --------------------------------------------- */
-
     if (!user_name) {
       return res.status(400).json({
         success: false,
@@ -438,10 +402,6 @@ app.post("/addPost", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       CHECK USER
-    --------------------------------------------- */
-
     const user = await User.findOne({
       name: {
         $regex: `^${escapeRegex(user_name)}$`,
@@ -455,10 +415,6 @@ app.post("/addPost", async (req, res) => {
         msg: "User not found. Please login again.",
       });
     }
-
-    /* ---------------------------------------------
-       CREATE POST
-    --------------------------------------------- */
 
     const post = await Post.create({
       user_name: user.name,
@@ -478,12 +434,14 @@ app.post("/addPost", async (req, res) => {
       post: {
         id: post._id.toString(),
         _id: post._id.toString(),
+
         user_name: post.user_name,
         title: post.title,
         description: post.description,
         content: post.content,
         hindi: post.hindi,
         hinglish: post.hinglish,
+
         created_at: post.createdAt,
       },
     });
@@ -525,20 +483,12 @@ app.post("/editPost", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       VALID MONGODB ID
-    --------------------------------------------- */
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.json({
         success: false,
         msg: "Invalid post ID",
       });
     }
-
-    /* ---------------------------------------------
-       FIND POST
-    --------------------------------------------- */
 
     const post = await Post.findById(id);
 
@@ -548,10 +498,6 @@ app.post("/editPost", async (req, res) => {
         msg: "Post not found",
       });
     }
-
-    /* ---------------------------------------------
-       FIND OWNER
-    --------------------------------------------- */
 
     const user = await User.findOne({
       name: {
@@ -567,10 +513,6 @@ app.post("/editPost", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       VERIFY PASSWORD
-    --------------------------------------------- */
-
     const match = await bcrypt.compare(
       String(password),
       user.password
@@ -583,14 +525,8 @@ app.post("/editPost", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       UPDATE POST
-    --------------------------------------------- */
-
     post.content = String(content || "").trim();
-
     post.hindi = String(hindi || "").trim();
-
     post.hinglish = String(hinglish || "").trim();
 
     await post.save();
@@ -641,20 +577,12 @@ app.post("/comment", async (req, res) => {
       });
     }
 
-    /* ---------------------------------------------
-       CHECK MONGODB ID
-    --------------------------------------------- */
-
     if (!mongoose.Types.ObjectId.isValid(post_id)) {
       return res.status(400).json({
         success: false,
         msg: "Invalid post ID",
       });
     }
-
-    /* ---------------------------------------------
-       CHECK POST EXISTS
-    --------------------------------------------- */
 
     const post = await Post.findById(post_id);
 
@@ -664,10 +592,6 @@ app.post("/comment", async (req, res) => {
         msg: "Post not found",
       });
     }
-
-    /* ---------------------------------------------
-       CREATE COMMENT
-    --------------------------------------------- */
 
     const newComment = await Comment.create({
       post_id: post._id,
@@ -680,6 +604,7 @@ app.post("/comment", async (req, res) => {
     res.json({
       success: true,
       msg: "Comment added",
+
       comment: {
         id: newComment._id.toString(),
         post_id: post_id,
@@ -720,13 +645,11 @@ app.get("/comments/:id", async (req, res) => {
       ...c,
 
       id: c._id.toString(),
-
       _id: c._id.toString(),
 
       post_id: c.post_id.toString(),
 
       created_at: c.createdAt || null,
-
       updated_at: c.updatedAt || null,
     }));
 
@@ -748,6 +671,7 @@ app.get("/writers", async (req, res) => {
       {
         $group: {
           _id: "$user_name",
+
           total_posts: {
             $sum: 1,
           },
@@ -776,7 +700,6 @@ app.get("/writers", async (req, res) => {
 
 /* =====================================================
    DELETE POST
-   Optional route
 ===================================================== */
 
 app.delete("/posts/:id", async (req, res) => {
@@ -820,25 +743,14 @@ app.delete("/posts/:id", async (req, res) => {
 });
 
 /* =====================================================
-   HEALTH CHECK
+   FRONTEND HOME
 ===================================================== */
-
-// ================= FRONTEND HOME =================
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-/* =====================================================
-   ESCAPE REGEX
-===================================================== */
-
-function escapeRegex(value) {
-  return String(value).replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
   );
-}
+});
 
 /* =====================================================
    ERROR HANDLER
@@ -865,122 +777,6 @@ app.listen(PORT, () => {
   console.log("       DIL KI BAATE SERVER");
   console.log("======================================");
   console.log(`🚀 Server: http://localhost:${PORT}`);
-  console.log(`🗄️ Database: MongoDB`);
+  console.log("🗄️ Database: MongoDB");
   console.log("======================================");
-=======
-const mysql = require("mysql2");
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-/* ================= DATABASE ================= */
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-});
-
-db.connect(err => {
-  if (err) {
-    console.error("❌ DB Connection Failed:", err);
-  } else {
-    console.log("✅ MySQL Connected");
-  }
-});
-
-/* ================= USERS ================= */
-app.post("/createUser", (req, res) => {
-  db.query(
-    "INSERT INTO users(name) VALUES (?)",
-    [req.body.name],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.send("ok");
-    }
-  );
-});
-
-app.get("/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json(result);
-  });
-});
-
-/* ================= POSTS ================= */
-app.get("/posts", (req, res) => {
-  let name = req.query.name;
-  let sql = "SELECT * FROM posts";
-  let params = [];
-
-  if (name) {
-    sql += " WHERE user_name=?";
-    params.push(name);
-  }
-
-  sql += " ORDER BY id DESC";
-
-  db.query(sql, params, (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json(result);
-  });
-});
-
-app.post("/addPost", (req, res) => {
-  let { user_name, title, description, content } = req.body;
-
-  db.query(
-    "INSERT INTO posts(user_name,title,description,content) VALUES (?,?,?,?)",
-    [user_name, title, description, content],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.send("ok");
-    }
-  );
-});
-
-/* ================= COMMENTS ================= */
-app.post("/comment", (req, res) => {
-  let { post_id, user, comment } = req.body;
-
-  db.query(
-    "INSERT INTO comments(post_id,user,comment) VALUES (?,?,?)",
-    [post_id, user, comment],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.send("ok");
-    }
-  );
-});
-
-app.get("/comments/:id", (req, res) => {
-  db.query(
-    "SELECT * FROM comments WHERE post_id=? ORDER BY id DESC",
-    [req.params.id],
-    (err, result) => {
-      if (err) return res.status(500).json(err);
-      res.json(result);
-    }
-  );
-});
-
-/* ================= WRITERS ================= */
-app.get("/writers", (req, res) => {
-  db.query(
-    `SELECT user_name, COUNT(*) as total_posts FROM posts GROUP BY user_name`,
-    (err, result) => {
-      if (err) return res.status(500).json(err);
-      res.json(result);
-    }
-  );
-});
-
-/* ================= SERVER ================= */
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server Running on port ${PORT}`);
->>>>>>> 5e41aaeebbfb94a6ce777a2b1da69a65e1d7111e
 });
